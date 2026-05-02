@@ -1,0 +1,257 @@
+@if (mostrarConfirmacion) {
+  <div class="modal-overlay">
+    <div class="modal-confirmacion">
+      <div class="modal-icono">
+        <i class="bi bi-trash"></i>
+      </div>
+      <h4 class="modal-titulo">¿Eliminar reseña?</h4>
+      <p class="modal-texto">Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar esta reseña?</p>
+      <div class="modal-botones">
+        <button class="btn-cancelar-resena" (click)="cancelarEliminar()">Cancelar</button>
+        <button class="btn-confirmar-eliminar" (click)="confirmarEliminar()">
+          <i class="bi bi-trash me-2"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+@if (mostrarFormReporte) {
+  <div class="modal-overlay">
+    <div class="modal-confirmacion">
+      <div class="modal-icono" style="background: rgba(251, 191, 36, 0.1); color: #d97706;">
+        <i class="bi bi-flag"></i>
+      </div>
+      <h4 class="modal-titulo">Reportar reseña</h4>
+      <p class="modal-texto">Explica por qué consideras que esta reseña es inapropiada o fraudulenta.</p>
+      <textarea class="form-control reporte-textarea" rows="3" [(ngModel)]="motivoReporte"
+        placeholder="Describe el motivo del reporte (mínimo 10 caracteres)...">
+      </textarea>
+      @if (errorReporte) {
+        <div class="alert alert-danger py-2 mt-2 text-start">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorReporte }}
+        </div>
+      }
+      <div class="modal-botones mt-3">
+        <button class="btn-cancelar-resena" (click)="cancelarReporte()">Cancelar</button>
+        <button class="btn-enviar-reporte" (click)="enviarReporte()" [disabled]="enviandoReporte">
+          @if (enviandoReporte) {
+            <span class="spinner-border spinner-border-sm me-2"></span> Enviando...
+          } @else {
+            <i class="bi bi-flag me-2"></i> Enviar reporte
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+<div class="details-wrapper">
+  @if (cargando) {
+    <div class="text-center py-5">
+      <div class="spinner-border" style="color: var(--color-morado)"></div>
+    </div>
+  } @else if (empresa) {
+    <section class="empresa-hero">
+      <div class="container">
+        <div class="empresa-hero-contenido">
+          <div class="empresa-inicial-grande">
+            {{ empresa.nombre.charAt(0).toUpperCase() }}
+          </div>
+          <div class="empresa-hero-info">
+            <span class="empresa-categoria-badge">
+              <i class="bi bi-tag me-1"></i>{{ empresa.categoria?.nombre }}
+            </span>
+            <h1 class="empresa-titulo">{{ empresa.nombre }}</h1>
+            <div class="empresa-valoracion">
+              <div class="estrellas">
+                @for (estrella of estrellas(mediaEstrellas); track $index) {
+                  <i class="bi {{ estrella }}"></i>
+                }
+              </div>
+              <span class="media-numero">{{ mediaEstrellas | number:'1.1-1' }}</span>
+              <span class="total-resenas">({{ resenas.length }} reseñas)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="container contenido-principal">
+      <div class="layout-grid">
+        <div class="columna-izquierda">
+          <div class="info-card">
+            <h3 class="card-titulo"><i class="bi bi-info-circle me-2"></i>Información de la empresa</h3>
+            <p class="info-descripcion">{{ empresa.descripcion || 'Sin descripción disponible' }}</p>
+            <div class="info-item">
+              <i class="bi bi-tag"></i>
+              <span>{{ empresa.categoria?.nombre }}</span>
+            </div>
+          </div>
+          <div class="valoracion-card">
+            <h3 class="card-titulo">Resumen de valoraciones</h3>
+            <div class="valoracion-media-grande">
+              <span class="numero-grande">{{ mediaEstrellas | number:'1.1-1' }}</span>
+              <div>
+                <div class="estrellas-grandes">
+                  @for (estrella of estrellas(mediaEstrellas); track $index) {
+                    <i class="bi {{ estrella }}"></i>
+                  }
+                </div>
+                <span class="total-texto">{{ resenas.length }} reseñas en total</span>
+              </div>
+            </div>
+            <div class="barras-estrellas">
+              @for (num of [5, 4, 3, 2, 1]; track num) {
+                <div class="barra-fila">
+                  <span class="barra-label">{{ num }} <i class="bi bi-star-fill estrella-mini"></i></span>
+                  <div class="barra-progreso">
+                    <div class="barra-relleno" [style.width.%]="porcentajeEstrellas(num)"></div>
+                  </div>
+                  <span class="barra-porcentaje">{{ porcentajeEstrellas(num) }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="columna-derecha">
+          <div class="resenas-header">
+            <h2 class="seccion-titulo">Reseñas</h2>
+            @if (authServicio.estaLogueado()) {
+              @if (authServicio.obtenerSesion()?.rol === 'USER') {
+                <button class="btn-nueva-resena" (click)="toggleFormResena()">
+                  @if (mostrarFormResena) {
+                    <i class="bi bi-x-lg me-2"></i> Cancelar
+                  } @else {
+                    <i class="bi bi-pencil me-2"></i> Escribir reseña
+                  }
+                </button>
+              } @else {
+                <div class="aviso-empresa">
+                  <i class="bi bi-info-circle me-2"></i> Solo los usuarios pueden escribir reseñas
+                </div>
+              }
+            } @else {
+              <a routerLink="/login" class="btn-nueva-resena">
+                <i class="bi bi-person me-2"></i> Inicia sesión para opinar
+              </a>
+            }
+          </div>
+          @if (mostrarFormResena) {
+            <div class="form-resena-container mb-3">
+              <h4 class="form-resena-titulo">Escribe tu reseña</h4>
+              <form [formGroup]="formResena" (ngSubmit)="enviarResena()">
+                <div class="estrellas-selector mb-3">
+                  <label class="form-label-resena">Valoración</label>
+                  <div class="estrellas-interactivas">
+                    @for (num of [1,2,3,4,5]; track num) {
+                      <i class="bi {{ num <= estrellasSeleccionadas ? 'bi-star-fill' : 'bi-star' }} estrella-selector"
+                        (click)="seleccionarEstrella(num)"></i>
+                    }
+                  </div>
+                  @if (formResena.get('estrella')?.value === 0 && formResena.get('estrella')?.touched) {
+                    <div class="error-texto">Selecciona una valoración</div>
+                  }
+                </div>
+                <div class="mb-3">
+                  <label class="form-label-resena">Título</label>
+                  <input type="text" class="form-control form-resena-input" formControlName="titulo"
+                    placeholder="Resume tu experiencia en una frase"
+                    [class.is-invalid]="formResena.get('titulo')?.invalid && formResena.get('titulo')?.touched">
+                  <div class="invalid-feedback">El título es obligatorio (mínimo 3 caracteres).</div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label-resena">Reseña</label>
+                  <textarea class="form-control form-resena-input" rows="4" formControlName="contenido"
+                    placeholder="Cuéntanos tu experiencia detalladamente..."
+                    [class.is-invalid]="formResena.get('contenido')?.invalid && formResena.get('contenido')?.touched">
+                  </textarea>
+                  <div class="invalid-feedback">La reseña es obligatoria (mínimo 10 caracteres).</div>
+                </div>
+                @if (errorResena) {
+                  <div class="alert alert-danger py-2">
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ errorResena }}
+                  </div>
+                }
+                <div class="d-flex gap-2 justify-content-end">
+                  <button type="button" class="btn-cancelar-resena" (click)="toggleFormResena()">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="btn-enviar-resena" [disabled]="enviandoResena">
+                    @if (enviandoResena) {
+                      <span class="spinner-border spinner-border-sm me-2"></span> Enviando...
+                    } @else {
+                      <i class="bi bi-send me-2"></i> Enviar reseña
+                    }
+                  </button>
+                </div>
+              </form>
+            </div>
+          }
+          @if (resenas.length === 0) {
+            <div class="sin-resenas">
+              <i class="bi bi-chat-square-text"></i>
+              <p>Todavía no hay reseñas para esta empresa</p>
+              <p class="sin-resenas-sub">¡Sé el primero en opinar!</p>
+            </div>
+          } @else {
+            <div class="resenas-lista">
+              @for (resena of resenasMostradas; track resena.id) {
+                <div class="resena-card">
+                  <div class="resena-header">
+                    <div class="resena-usuario">
+                      <div class="resena-avatar">
+                        {{ resena.usuario?.nombre ? resena.usuario!.nombre.charAt(0).toUpperCase() : '?' }}
+                      </div>
+                      <div>
+                        <span class="resena-nombre">{{ resena.usuario?.nombre }}</span>
+                        <span class="resena-fecha">{{ resena.fecha_creacion | date:'dd/MM/yyyy' }}</span>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="resena-estrellas">
+                        @for (estrella of estrellas(resena.estrella); track $index) {
+                          <i class="bi {{ estrella }}"></i>
+                        }
+                      </div>
+                      @if (authServicio.obtenerSesion()?.id === resena.usuario?.id) {
+                        <button class="btn-eliminar-resena" (click)="eliminarResena(resena.id!)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      }
+                      @if (authServicio.obtenerSesion()?.rol === 'USER' && authServicio.obtenerSesion()?.id !== resena.usuario?.id) {
+                        <button class="btn-reportar-resena" (click)="reportarResena(resena.id!)">
+                          <i class="bi bi-flag"></i>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                  <h4 class="resena-titulo">{{ resena.titulo }}</h4>
+                  <p class="resena-contenido">{{ resena.contenido }}</p>
+                </div>
+              }
+            </div>
+            @if (resenas.length > 3) {
+              <div class="text-center mt-3">
+                <button class="btn-ver-todas" (click)="toggleVerTodas()">
+                  @if (verTodasResenas) {
+                    <i class="bi bi-chevron-up me-2"></i> Ver menos
+                  } @else {
+                    <i class="bi bi-chevron-down me-2"></i> Ver todas las reseñas ({{ resenas.length }})
+                  }
+                </button>
+              </div>
+            }
+          }
+        </div>
+      </div>
+      <div class="mb-4 mt-2">
+        <a routerLink="/" class="btn-volver">
+          <i class="bi bi-arrow-left me-2"></i> Volver al inicio
+        </a>
+      </div>
+    </div>
+  } @else {
+    <div class="text-center py-5">
+      <p style="color: var(--color-texto-suave)">Empresa no encontrada</p>
+      <a routerLink="/" class="btn-volver mt-3">Volver al inicio</a>
+    </div>
+  }
+</div>

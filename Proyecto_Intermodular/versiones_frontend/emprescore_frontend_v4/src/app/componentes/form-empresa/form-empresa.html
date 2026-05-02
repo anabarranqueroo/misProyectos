@@ -1,0 +1,78 @@
+<div class="form-empresa-wrapper">
+  <div class="form-empresa-card">
+
+    <div class="form-empresa-header">
+      <img src="assets/logo_letra.png" alt="EmpreScore" class="form-logo">
+      <h2 class="form-titulo">{{ titulo }}</h2>
+      <p class="form-subtitulo">
+        @if (idEmpresa === -1) {
+          Registra tu empresa en EmpreScore
+        } @else {
+          Actualiza la información de tu empresa
+        }
+      </p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="envio()">
+
+      <div class="mb-3">
+        <label class="form-label">Nombre de la empresa</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-building"></i></span>
+          <input type="text" formControlName="nombre" class="form-control"
+            [class.is-invalid]="form.get('nombre')?.invalid && form.get('nombre')?.touched"
+            placeholder="Nombre de tu empresa">
+          <div class="invalid-feedback">El nombre es obligatorio (mínimo 2 caracteres).</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-text-left"></i></span>
+          <textarea formControlName="descripcion" class="form-control" rows="3"
+            [class.is-invalid]="form.get('descripcion')?.invalid && form.get('descripcion')?.touched"
+            placeholder="Describe tu empresa en detalle..."></textarea>
+          <div class="invalid-feedback">La descripción es obligatoria (mínimo 10 caracteres).</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Categoría</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-tag"></i></span>
+          <select formControlName="categoriaId" class="form-select"
+            [class.is-invalid]="form.get('categoriaId')?.invalid && form.get('categoriaId')?.touched">
+            <option value="">Selecciona una categoría</option>
+            @for (cat of categorias; track cat.id) {
+              <option [value]="cat.id">{{ cat.nombre }}</option>
+            }
+          </select>
+          <div class="invalid-feedback">Selecciona una categoría.</div>
+        </div>
+      </div>
+
+      @if (errorMensaje) {
+        <div class="alert alert-danger py-2">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMensaje }}
+        </div>
+      }
+
+      <button type="submit" class="btn-form w-100" [disabled]="cargando">
+        @if (cargando) {
+          <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
+        } @else if (idEmpresa === -1) {
+          <i class="bi bi-building-add me-2"></i> Crear empresa
+        } @else {
+          <i class="bi bi-check-lg me-2"></i> Guardar cambios
+        }
+      </button>
+
+    </form>
+
+    <button class="btn-form btn-volver w-100 mt-2" (click)="volver()">
+      <i class="bi bi-arrow-left me-2"></i> Volver
+    </button>
+
+  </div>
+</div>

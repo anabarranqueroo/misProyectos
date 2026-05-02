@@ -1,0 +1,92 @@
+<div class="register-wrapper">
+  <div class="register-card">
+    <div class="register-header">
+      <img src="assets/logo_letra.png" alt="EmpreScore" class="register-logo">
+      <h2 class="register-titulo">Crear cuenta</h2>
+      <p class="register-subtitulo">Únete a EmpreScore</p>
+    </div>
+    <div class="tipo-selector mb-4">
+      <button class="btn-tipo" [class.activo]="tipoRegistro === 'USER'" (click)="seleccionarTipo('USER')">
+        <i class="bi bi-person me-2"></i> Usuario
+      </button>
+      <button class="btn-tipo" [class.activo]="tipoRegistro === 'EMPRESA'" (click)="seleccionarTipo('EMPRESA')">
+        <i class="bi bi-building me-2"></i> Empresa
+      </button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="envio()">
+      <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person"></i></span>
+          <input type="text" formControlName="nombre" class="form-control"
+            [class.is-invalid]="form.get('nombre')?.invalid && form.get('nombre')?.touched"
+            placeholder="Tu nombre completo">
+          <div class="invalid-feedback">El nombre es obligatorio (mínimo 2 caracteres).</div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <input type="email" formControlName="email" class="form-control"
+            [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+            placeholder="example@gmail.com">
+          <div class="invalid-feedback">
+            @if (form.get('email')?.errors?.['required']) {
+              El email es obligatorio.
+            } @else if (form.get('email')?.errors?.['email']) {
+              Introduce un email válido.
+            } @else if (form.get('email')?.errors?.['pattern']) {
+              Solo se permiten correos @gmail.com.
+            }
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock"></i></span>
+          <input [type]="mostrarPassword ? 'text' : 'password'" formControlName="password" class="form-control"
+            [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+            placeholder="Mínimo 6 caracteres">
+          <span class="input-group-text" (click)="togglePassword()" style="cursor: pointer;">
+            <i [class]="mostrarPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </span>
+          <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Confirmar contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+          <input [type]="mostrarConfirmarPassword ? 'text' : 'password'" formControlName="confirmarPassword"
+            class="form-control"
+            [class.is-invalid]="form.get('confirmarPassword')?.touched && form.hasError('noCoinciden')"
+            placeholder="Repite la contraseña">
+          <span class="input-group-text" (click)="toggleConfirmarPassword()" style="cursor: pointer;">
+            <i [class]="mostrarConfirmarPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </span>
+          <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+        </div>
+      </div>
+      @if (errorMensaje) {
+      <div class="alert alert-danger py-2">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMensaje }}
+      </div>
+      }
+      <button type="submit" class="btn-register w-100" [disabled]="cargando">
+        @if (cargando) {
+        <span class="spinner-border spinner-border-sm me-2"></span> Registrando...
+        } @else {
+        <i class="bi bi-person-plus me-2"></i> Crear cuenta
+        }
+      </button>
+    </form>
+    <button class="btn-register btn-volver w-100 mt-2" routerLink="/">
+      <i class="bi bi-arrow-left me-2"></i> Volver
+    </button>
+    <div class="register-footer">
+      <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+    </div>
+  </div>
+</div>

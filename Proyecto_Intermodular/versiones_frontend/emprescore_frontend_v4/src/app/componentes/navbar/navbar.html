@@ -1,0 +1,119 @@
+<nav class="navbar navbar-expand-lg navbar-emprescore">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand ps-0 ms-0" routerLink="/">
+      <img src="assets/logo_letra.png" alt="EmpreScore">
+      <img src="assets/eslogan.png" alt="Valora, Aprende, Decide" style="height: 35px;">
+    </a>
+    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3 d-none d-lg-flex">
+      <li class="nav-item me-2">
+        <a class="nav-link nav-icono" routerLink="/" routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: true}">
+          <i class="bi bi-house-fill"></i>
+          <span class="nav-icono-label">Inicio</span>
+        </a>
+      </li>
+      @if (authServicio.estaLogueado()) {
+      <li class="nav-item">
+        <span class="nav-text-usuario">
+          <i class="bi bi-person-circle"></i>
+          {{ authServicio.obtenerSesion()?.nombre }}
+          <span class="badge-rol">
+            {{ authServicio.obtenerSesion()?.rol }}
+          </span>
+        </span>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link nav-icono" routerLink="/perfil">
+          <i class="bi bi-person-fill"></i>
+          <span class="nav-icono-label">Mi perfil</span>
+        </a>
+      </li>
+      @if (authServicio.esEmpresa()) {
+      <li class="nav-item">
+        <a class="nav-link nav-icono" routerLink="/form-empresa/-1" title="Mi Empresa">
+          <i class="bi bi-building"></i>
+          <span class="nav-icono-label">Mi Empresa</span>
+        </a>
+      </li>
+      }
+      @if (authServicio.esAdmin()) {
+      <li class="nav-item">
+        <a class="nav-link nav-icono" routerLink="/admin" title="Panel de Administración">
+          <i class="bi bi-shield-check"></i>
+          <span class="nav-icono-label">Panel Administración</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link nav-icono" routerLink="/admin/usuarios" title="Usuarios">
+          <i class="bi bi-people"></i>
+          <span class="nav-icono-label">Usuarios</span>
+        </a>
+      </li>
+      }
+      <li class="nav-item">
+        <a class="nav-link nav-icono" (click)="cerrarSesion()" style="cursor:pointer;" title="Cerrar Sesión">
+          <i class="bi bi-box-arrow-right"></i>
+          <span class="nav-icono-label">Cerrar Sesión</span>
+        </a>
+      </li>
+      } @else {
+      <li class="nav-item">
+        <a class="nav-link nav-icono" routerLink="/login" routerLinkActive="active">
+          <i class="bi bi-person"></i>
+          <span class="nav-icono-label">Cuenta</span>
+        </a>
+      </li>
+      }
+    </ul>
+    <button class="navbar-toggler d-lg-none ms-auto" type="button" data-bs-toggle="offcanvas"
+      data-bs-target="#menuLateral">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </div>
+</nav>
+<div class="offcanvas offcanvas-end offcanvas-emprescore" tabindex="-1" id="menuLateral">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">EmpreScore</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas">
+    </button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column gap-3">
+    <a class="nav-link nav-icono-lateral" routerLink="/" data-bs-dismiss="offcanvas">
+      <i class="bi bi-house-fill me-2"></i>
+      Inicio
+    </a>
+    @if (authServicio.estaLogueado()) {
+    <div class="nav-text-usuario">
+      <i class="bi bi-person-circle me-2"></i>
+      {{ authServicio.obtenerSesion()?.nombre }}
+      <span class="badge-rol ms-2">{{ authServicio.obtenerSesion()?.rol }}</span>
+    </div>
+    <a class="nav-link nav-icono-lateral" routerLink="/perfil" data-bs-dismiss="offcanvas">
+      <i class="bi bi-person me-2"></i>
+      Mi perfil
+    </a>
+    @if (authServicio.esEmpresa()) {
+    <a class="nav-link nav-icono-lateral" routerLink="/form-empresa/-1" data-bs-dismiss="offcanvas">
+      <i class="bi bi-building me-2"></i> Mi Empresa
+    </a>
+    }
+    @if (authServicio.esAdmin()) {
+    <a class="nav-link nav-icono-lateral" routerLink="/admin" data-bs-dismiss="offcanvas">
+      <i class="bi bi-shield-check me-2"></i> Panel Administración
+    </a>
+    <a class="nav-link nav-icono-lateral" routerLink="/admin/usuarios" data-bs-dismiss="offcanvas">
+      <i class="bi bi-people me-2"></i> Usuarios
+    </a>
+    }
+    <a class="nav-link nav-icono-lateral" (click)="cerrarSesion()">
+      <i class="bi bi-box-arrow-right me-2"></i>
+      Cerrar sesión
+    </a>
+    } @else {
+    <a class="nav-link nav-icono-lateral" routerLink="/login" data-bs-dismiss="offcanvas">
+      <i class="bi bi-person me-2"></i>
+      Cuenta
+    </a>
+    }
+  </div>
+</div>

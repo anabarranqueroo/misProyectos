@@ -1,0 +1,168 @@
+<div class="home-wrapper">
+  <section class="hero">
+    <div class="hero-contenido">
+      <h1 class="hero-titulo">Descubre y valora empresas</h1>
+      <p class="hero-subtitulo">Miles de opiniones reales para ayudarte a tomar mejores decisiones</p>
+      <div class="hero-buscador">
+        <div class="buscador-input">
+          <i class="bi bi-search"></i>
+          <input type="text" [(ngModel)]="busqueda" placeholder="Busca una empresa..." (keyup.enter)="cargarEmpresas()">
+          @if (busqueda) {
+            <button class="buscador-limpiar" (click)="limpiarFiltros()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          }
+        </div>
+        <button class="btn-buscar" (click)="cargarEmpresas()">
+          Buscar
+        </button>
+      </div>
+    </div>
+  </section>
+  <section class="categorias">
+  <div class="container">
+    <h2 class="seccion-titulo">Explorar por categoría</h2>
+    <div class="categorias-grid">
+      @for (cat of categorias; track cat.id) {
+        <button class="categoria-card"
+          [class.activa]="categoriaSeleccionada === cat.id"
+          (click)="seleccionarCategoria(cat.id!)">
+          <i class="bi {{ iconoCategoria(cat.nombre) }} categoria-icono"></i>
+          <span class="categoria-nombre">{{ cat.nombre }}</span>
+        </button>
+      }
+    </div>
+  </div>
+</section>
+<section class="empresas">
+  <div class="container">
+    <div class="empresas-header">
+      <h2 class="seccion-titulo">Empresas destacadas</h2>
+      @if (categoriaSeleccionada || busqueda) {
+        <button class="btn-limpiar" (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle me-1"></i> Limpiar filtros
+        </button>
+      }
+    </div>
+    @if (cargando) {
+      <div class="text-center py-5">
+        <div class="spinner-border" style="color: var(--color-morado)"></div>
+      </div>
+    } @else if (empresas.length === 0) {
+      <div class="sin-resultados">
+        <i class="bi bi-search"></i>
+        <p>No se encontraron empresas</p>
+      </div>
+    } @else {
+      <div class="empresas-grid">
+        @for (empresa of empresas; track empresa.id) {
+          <div class="empresa-card" [routerLink]="['/empresa', empresa.id]">
+            <div class="empresa-card-header">
+              <div class="empresa-inicial">
+                {{ empresa.nombre.charAt(0).toUpperCase() }}
+              </div>
+              <div class="empresa-info">
+                <h3 class="empresa-nombre">{{ empresa.nombre }}</h3>
+                <span class="empresa-categoria">
+                  <i class="bi {{ iconoCategoria(empresa.categoria?.nombre || '') }} me-1"></i>
+                  {{ empresa.categoria?.nombre }}
+                </span>
+              </div>
+            </div>
+            <p class="empresa-descripcion">
+              {{ empresa.descripcion || 'Sin descripción disponible' }}
+            </p>
+            <div class="empresa-footer">
+              <span class="ver-mas">Ver más <i class="bi bi-arrow-right"></i></span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
+@if (!authServicio.estaLogueado()) {
+  <section class="seccion-publica">
+    <div class="container">
+      <div class="banner-registro">
+        <div class="banner-texto">
+          <h2>¿Quieres valorar empresas?</h2>
+          <p>Únete a EmpreScore y comparte tu experiencia con miles de usuarios</p>
+        </div>
+        <div class="banner-botones">
+          <a routerLink="/register/user" class="btn-banner-principal">
+            <i class="bi bi-person-plus me-2"></i> Crear cuenta gratis
+          </a>
+          <a routerLink="/register/empresa" class="btn-banner-secundario">
+            <i class="bi bi-building me-2"></i> Registrar mi empresa
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+@if (authServicio.estaLogueado() && authServicio.obtenerSesion()?.rol === 'USER') {
+  <section class="seccion-usuario">
+    <div class="container">
+      <h2 class="seccion-titulo">Bienvenido, {{ authServicio.obtenerSesion()?.nombre }}</h2>
+      <p class="seccion-subtitulo">¿Qué quieres hacer hoy?</p>
+      <div class="acciones-grid">
+        <div class="accion-card" [routerLink]="['/']" (click)="scrollCategorias()">
+          <i class="bi bi-search"></i>
+          <span>Buscar empresa</span>
+        </div>
+        <div class="accion-card" [routerLink]="['/perfil']" [queryParams]="{ seccion: 'resenas' }">
+          <i class="bi bi-star"></i>
+          <span>Mis reseñas</span>
+        </div>
+        <div class="accion-card" routerLink="/perfil">
+          <i class="bi bi-person"></i>
+          <span>Mi perfil</span>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+@if (authServicio.estaLogueado() && authServicio.obtenerSesion()?.rol === 'EMPRESA') {
+  <section class="seccion-empresa">
+    <div class="container">
+      <h2 class="seccion-titulo">Panel de tu empresa</h2>
+      <div class="acciones-grid">
+        <div class="accion-card" routerLink="/form-empresa/-1">
+          <i class="bi bi-building-add"></i>
+          <span>Gestionar empresa</span>
+        </div>
+        <div class="accion-card" routerLink="/perfil">
+          <i class="bi bi-person"></i>
+          <span>Mi perfil</span>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+@if (authServicio.estaLogueado() && authServicio.obtenerSesion()?.rol === 'ADMIN') {
+  <section class="seccion-admin">
+    <div class="container">
+      <h2 class="seccion-titulo">Panel rápido de administración</h2>
+      <div class="acciones-grid">
+        <div class="accion-card" routerLink="/admin">
+          <i class="bi bi-shield-check"></i>
+          <span>Panel Admin</span>
+        </div>
+        <div class="accion-card" routerLink="/admin">
+          <i class="bi bi-clock-history"></i>
+          <span>Reseñas pendientes</span>
+        </div>
+        <div class="accion-card" [routerLink]="['/admin']" [queryParams]="{seccion: 'reportes'}">
+          <i class="bi bi-flag"></i>
+          <span>Reportes</span>
+        </div>
+        <div class="accion-card" routerLink="/admin/usuarios">
+          <i class="bi bi-people"></i>
+          <span>Usuarios</span>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+</div>

@@ -1,0 +1,303 @@
+@if (mostrarConfirmacionEliminar) {
+<div class="modal-overlay">
+  <div class="modal-confirmacion">
+    <div class="modal-icono">
+      <i class="bi bi-exclamation-triangle"></i>
+    </div>
+    <h4 class="modal-titulo">¿Eliminar tu cuenta?</h4>
+    <p class="modal-texto">
+      Esta acción es permanente y eliminará todos tus datos, reseñas y acceso a EmpreScore.
+    </p>
+    <div class="modal-botones">
+      <button class="btn-cancelar" (click)="cerrarModalEliminar()" [disabled]="borrandoCuenta">
+        Cancelar
+      </button>
+      <button class="btn-confirmar-eliminar" (click)="confirmarEliminarCuenta()" [disabled]="borrandoCuenta">
+        @if (borrandoCuenta) {
+        <span class="spinner-border spinner-border-sm me-2"></span> Eliminando...
+        } @else {
+        <i class="bi bi-person-x me-2"></i> Eliminar definitivamente
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}
+<div class="profile-wrapper">
+  <div class="profile-header">
+    <div class="container">
+      <div class="profile-header-contenido">
+        <div class="profile-avatar-grande">
+          {{ sesion?.nombre?.charAt(0)?.toUpperCase() }}
+        </div>
+        <div class="profile-info">
+          <h1 class="profile-nombre">{{ sesion?.nombre }}</h1>
+          <p class="profile-email">{{ sesion?.email }}</p>
+          <span class="badge-rol {{ sesion?.rol?.toLowerCase() }}">{{ sesion?.rol }}</span>
+        </div>
+        <button class="btn-cerrar-sesion" (click)="cerrarSesion()">
+          <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="container profile-contenido">
+    <div class="profile-tabs">
+      <button class="profile-tab" [class.activa]="seccionActiva === 'info'" (click)="cambiarSeccion('info')">
+        <i class="bi bi-person me-2"></i> Mi información
+      </button>
+      @if (sesion?.rol === 'USER') {
+      <button class="profile-tab" [class.activa]="seccionActiva === 'resenas'" (click)="cambiarSeccion('resenas')">
+        <i class="bi bi-star me-2"></i> Mis reseñas
+        @if (resenas.length > 0) {
+        <span class="tab-badge">{{ resenas.length }}</span>
+        }
+      </button>
+      }
+      @if (sesion?.rol === 'EMPRESA') {
+      <button class="profile-tab" [class.activa]="seccionActiva === 'empresa'" (click)="cambiarSeccion('empresa')">
+        <i class="bi bi-building me-2"></i> Mi empresa
+      </button>
+      }
+    </div>
+    @if (seccionActiva === 'info') {
+    <div class="info-card">
+      <h3 class="card-titulo"><i class="bi bi-person-circle me-2"></i>Información de la cuenta</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Nombre</span>
+          <span class="info-valor">{{ sesion?.nombre }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Email</span>
+          <span class="info-valor">{{ sesion?.email }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Rol</span>
+          <span class="info-valor">
+            <span class="badge-rol {{ sesion?.rol?.toLowerCase() }}">{{ sesion?.rol }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+    @if (editandoPerfil) {
+    <div class="editar-perfil-card mt-3">
+      <h3 class="card-titulo"><i class="bi bi-pencil me-2"></i>Editar información</h3>
+      <form [formGroup]="formPerfil" (ngSubmit)="guardarPerfil()">
+        <div class="mb-3">
+          <label class="form-label-pass">Nombre</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input type="text" formControlName="nombre" class="form-control"
+              [class.is-invalid]="formPerfil.get('nombre')?.invalid && formPerfil.get('nombre')?.touched"
+              placeholder="Tu nombre">
+            <div class="invalid-feedback">El nombre es obligatorio (mínimo 2 caracteres).</div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label-pass">Email</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" formControlName="email" class="form-control"
+              [class.is-invalid]="formPerfil.get('email')?.invalid && formPerfil.get('email')?.touched"
+              placeholder="Tu email">
+            <div class="invalid-feedback">Introduce un email válido.</div>
+          </div>
+        </div>
+        @if (errorPerfil) {
+        <div class="alert alert-danger py-2">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorPerfil }}
+        </div>
+        }
+        @if (exitoPerfil) {
+        <div class="alert alert-success py-2">
+          <i class="bi bi-check-circle me-2"></i>{{ exitoPerfil }}
+        </div>
+        }
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="btn-cancelar-pass" (click)="toggleEditarPerfil()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-cambiar-pass" [disabled]="guardandoPerfil">
+            @if (guardandoPerfil) {
+            <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
+            } @else {
+            <i class="bi bi-check-lg me-2"></i> Guardar cambios
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+    } @else {
+    <button class="btn-editar-perfil mt-3 w-100" (click)="toggleEditarPerfil()">
+      <i class="bi bi-pencil me-2"></i> Editar información
+    </button>
+    }
+    <div class="password-card mt-3">
+      <div class="password-header" (click)="toggleFormPassword()">
+        <h3 class="card-titulo mb-0">
+          <i class="bi bi-lock me-2"></i>Cambiar contraseña
+        </h3>
+        <i class="bi {{ mostrarFormPassword ? 'bi-chevron-up' : 'bi-chevron-down' }}"></i>
+      </div>
+      @if (mostrarFormPassword) {
+      <form [formGroup]="formPassword" (ngSubmit)="cambiarPassword()" class="mt-3">
+        <div class="mb-3">
+          <label class="form-label-pass">Contraseña actual</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input [type]="mostrar['passwordActual'] ? 'text' : 'password'" formControlName="passwordActual"
+              class="form-control"
+              [class.is-invalid]="formPassword.get('passwordActual')?.invalid && formPassword.get('passwordActual')?.touched"
+              placeholder="Tu contraseña actual">
+            <span class="input-group-text" (click)="toggle('passwordActual')" style="cursor: pointer;">
+              <i [class]="mostrar['passwordActual'] ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </span>
+            <div class="invalid-feedback">Introduce tu contraseña actual.</div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label-pass">Nueva contraseña</label>
+          <div class="input-group">
+            <input [type]="mostrar['passwordNueva'] ? 'text' : 'password'" formControlName="passwordNueva"
+              class="form-control"
+              [class.is-invalid]="formPassword.get('passwordNueva')?.invalid && formPassword.get('passwordNueva')?.touched"
+              placeholder="Mínimo 6 caracteres">
+            <span class="input-group-text" (click)="toggle('passwordNueva')" style="cursor: pointer;">
+              <i [class]="mostrar['passwordNueva'] ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </span>
+            <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label-pass">Confirmar nueva contraseña</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+            <input [type]="mostrar['confirmarPassword'] ? 'text' : 'password'" formControlName="confirmarPassword"
+              class="form-control"
+              [class.is-invalid]="formPassword.get('confirmarPassword')?.touched && formPassword.hasError('noCoinciden')"
+              placeholder="Repite la nueva contraseña">
+            <span class="input-group-text" (click)="toggle('confirmarPassword')" style="cursor: pointer;">
+              <i [class]="mostrar['confirmarPassword'] ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </span>
+            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+          </div>
+        </div>
+        @if (errorPassword) {
+        <div class="alert alert-danger py-2">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorPassword }}
+        </div>
+        }
+        @if (exitoPassword) {
+        <div class="alert alert-success py-2">
+          <i class="bi bi-check-circle me-2"></i>{{ exitoPassword }}
+        </div>
+        }
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="btn-cancelar-pass" (click)="toggleFormPassword()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-cambiar-pass" [disabled]="enviandoPassword">
+            @if (enviandoPassword) {
+            <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
+            } @else {
+            <i class="bi bi-check-lg me-2"></i> Guardar contraseña
+            }
+          </button>
+        </div>
+      </form>
+      }
+    </div>
+    @if (sesion?.rol !== 'ADMIN') {
+    <div class="danger-zone-card mt-4">
+      <div class="danger-header">
+        <h3 class="card-titulo text-danger mb-0">
+          <i class="bi bi-shield-exclamation me-2"></i>Zona de peligro
+        </h3>
+      </div>
+      <div class="danger-body mt-2">
+        <p class="text-muted small">Una vez que elimines tu cuenta, no hay marcha atrás. Por favor, asegúrate.</p>
+        <button class="btn-outline-danger" (click)="abrirModalEliminar()">
+          <i class="bi bi-person-x me-2"></i> Eliminar mi cuenta permanentemente
+        </button>
+      </div>
+    </div>
+    }
+    }
+    @if (seccionActiva === 'resenas') {
+    @if (cargando) {
+    <div class="text-center py-5">
+      <div class="spinner-border" style="color: var(--color-morado)"></div>
+    </div>
+    } @else if (resenas.length === 0) {
+    <div class="sin-items">
+      <i class="bi bi-star"></i>
+      <p>Todavía no has escrito ninguna reseña</p>
+      <a routerLink="/" class="btn-accion">Buscar empresas</a>
+    </div>
+    } @else {
+    <div class="resenas-lista">
+      @for (resena of resenas; track resena.id) {
+      <div class="resena-card">
+        <div class="resena-header">
+          <div class="resena-empresa">
+            <i class="bi bi-building me-2"></i>
+            <a [routerLink]="['/empresa', resena.empresa?.id]" class="empresa-link">
+              {{ resena.empresa?.nombre }}
+            </a>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <div class="resena-estrellas">
+              @for (estrella of estrellas(resena.estrella); track $index) {
+              <i class="bi {{ estrella }}"></i>
+              }
+            </div>
+            <span class="badge-estado {{ resena.estado?.toLowerCase() }}">
+              {{ resena.estado }}
+            </span>
+          </div>
+        </div>
+        <h4 class="resena-titulo">{{ resena.titulo }}</h4>
+        <p class="resena-contenido">{{ resena.contenido }}</p>
+        <span class="resena-fecha">{{ resena.fecha_creacion | date:'dd/MM/yyyy' }}</span>
+      </div>
+      }
+    </div>
+    }
+    }
+    @if (seccionActiva === 'empresa') {
+    @if (!miEmpresa) {
+    <div class="sin-items">
+      <i class="bi bi-building"></i>
+      <p>Todavía no has registrado tu empresa</p>
+      <a routerLink="/form-empresa/-1" class="btn-accion">
+        <i class="bi bi-building-add me-2"></i> Registrar empresa
+      </a>
+    </div>
+    } @else {
+    <div class="empresa-card">
+      <div class="empresa-card-header">
+        <div class="empresa-inicial">
+          {{ miEmpresa.nombre.charAt(0).toUpperCase() }}
+        </div>
+        <div>
+          <h3 class="empresa-nombre">{{ miEmpresa.nombre }}</h3>
+          <span class="empresa-categoria">
+            <i class="bi bi-tag me-1"></i>{{ miEmpresa.categoria?.nombre }}
+          </span>
+        </div>
+      </div>
+      <p class="empresa-descripcion">{{ miEmpresa.descripcion }}</p>
+      <div class="empresa-acciones">
+        <a [routerLink]="['/empresa', miEmpresa.id]" class="btn-ver-empresa">
+          <i class="bi bi-eye me-2"></i> Ver empresa
+        </a>
+        <a [routerLink]="['/form-empresa', miEmpresa.id]" class="btn-editar-empresa">
+          <i class="bi bi-pencil me-2"></i> Editar empresa
+        </a>
+      </div>
+    </div>
+    }
+    }
+  </div>
+</div>

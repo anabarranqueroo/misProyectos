@@ -1,0 +1,180 @@
+@if (mostrarConfirmacion) {
+<div class="modal-overlay">
+  <div class="modal-confirmacion">
+    <div class="modal-icono">
+      <i class="bi bi-person-x"></i>
+    </div>
+    <h4 class="modal-titulo">¿Eliminar usuario?</h4>
+    <p class="modal-texto">Esta acción no se puede deshacer. Se eliminará el usuario y todos sus datos.</p>
+    <div class="modal-botones">
+      <button class="btn-cancelar" (click)="cancelarEliminar()">Cancelar</button>
+      <button class="btn-confirmar-eliminar" (click)="confirmarEliminar()">
+        <i class="bi bi-person-x me-2"></i> Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+@if (usuarioEditando) {
+<div class="modal-overlay">
+  <div class="modal-confirmacion" style="max-width: 480px;">
+    <h4 class="modal-titulo">Editar usuario</h4>
+    <form [formGroup]="formEdicion" (ngSubmit)="guardarEdicion()">
+      <div class="mb-3 text-start">
+        <label class="form-label-edit">Nombre</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person"></i></span>
+          <input type="text" formControlName="nombre" class="form-control"
+            [class.is-invalid]="formEdicion.get('nombre')?.invalid && formEdicion.get('nombre')?.touched"
+            placeholder="Nombre del usuario">
+          <div class="invalid-feedback">El nombre es obligatorio.</div>
+        </div>
+      </div>
+      <div class="mb-3 text-start">
+        <label class="form-label-edit">Email</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <input type="email" formControlName="email" class="form-control"
+            [class.is-invalid]="formEdicion.get('email')?.invalid && formEdicion.get('email')?.touched"
+            placeholder="Email del usuario">
+          <div class="invalid-feedback">Introduce un email válido.</div>
+        </div>
+      </div>
+      <div class="mb-3 text-start">
+        <label class="form-label-edit">Rol</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-shield"></i></span>
+          <select formControlName="rol" class="form-select">
+            <option value="USER">USER</option>
+            <option value="EMPRESA">EMPRESA</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+      </div>
+      @if (errorEdicion) {
+      <div class="alert alert-danger py-2 text-start">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ errorEdicion }}
+      </div>
+      }
+      <div class="modal-botones">
+        <button type="button" class="btn-cancelar" (click)="cancelarEdicion()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-confirmar-editar" [disabled]="guardandoUsuario">
+          @if (guardandoUsuario) {
+          <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
+          } @else {
+          <i class="bi bi-check-lg me-2"></i> Guardar
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<div class="admin-usuarios-wrapper">
+
+  <div class="admin-header">
+    <div class="container">
+      <div class="admin-header-contenido">
+        <div>
+          <h1 class="admin-titulo">Gestión de Usuarios</h1>
+          <p class="admin-subtitulo">Administra los usuarios registrados en EmpreScore</p>
+        </div>
+        <a routerLink="/admin" class="btn-volver">
+          <i class="bi bi-arrow-left me-2"></i> Volver al panel
+        </a>
+      </div>
+      <div class="admin-stats">
+        <div class="stat-card">
+          <i class="bi bi-people"></i>
+          <div>
+            <span class="stat-numero">{{ usuarios.length }}</span>
+            <span class="stat-label">Usuarios totales</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <i class="bi bi-person"></i>
+          <div>
+            <span class="stat-numero">{{ usuarios | roleCount:'USER' }}</span>
+            <span class="stat-label">Usuarios</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <i class="bi bi-building"></i>
+          <div>
+            <span class="stat-numero">{{ usuarios | roleCount:'EMPRESA' }}</span>
+            <span class="stat-label">Empresas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container admin-contenido">
+
+    @if (cargando) {
+    <div class="text-center py-5">
+      <div class="spinner-border" style="color: var(--color-morado)"></div>
+    </div>
+    } @else if (usuarios.length === 0) {
+    <div class="sin-items">
+      <i class="bi bi-people"></i>
+      <p>No hay usuarios registrados</p>
+    </div>
+    } @else {
+    <div class="tabla-container">
+      <div class="table-responsive">
+        <table class="tabla-usuarios">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Fecha registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (usuario of usuarios; track usuario.id) {
+            <tr>
+              <td>
+                <div class="usuario-info">
+                  <div class="usuario-avatar">
+                    {{ usuario.nombre.charAt(0).toUpperCase() }}
+                  </div>
+                  <span class="usuario-nombre">{{ usuario.nombre }}</span>
+                </div>
+              </td>
+              <td class="usuario-email">{{ usuario.email }}</td>
+              <td>
+                <span class="badge-rol {{ usuario.rol?.toLowerCase() }}">
+                  {{ usuario.rol }}
+                </span>
+              </td>
+              <td class="usuario-fecha">{{ usuario.fecha_creacion | date:'dd/MM/yyyy' }}</td>
+              <td>
+                @if (usuario.id !== authServicio.obtenerSesion()?.id) {
+                <div class="d-flex gap-2">
+                  <button class="btn-editar-usuario" (click)="editarUsuario(usuario)">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn-eliminar" (click)="eliminarUsuario(usuario.id!)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+                } @else {
+                <span class="tu-cuenta">Tú</span>
+                }
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    }
+  </div>
+</div>

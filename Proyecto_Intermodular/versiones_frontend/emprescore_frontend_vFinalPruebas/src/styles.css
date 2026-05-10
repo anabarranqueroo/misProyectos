@@ -1,0 +1,25 @@
+:root {
+  --color-fondo: #0d1117;
+  --color-cyan: #00d4ff;
+  --color-morado: #7b2ff7;
+  --color-magenta: #c724b1;
+  --color-texto: #ffffff;
+  --color-texto-suave: #a0a8b8;
+  --color-card: #161b27;
+  --color-card-hover: #1e2538;
+}
+
+body {
+  background-color: #f0f4ff;
+  color: #2a2a3d;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+a {
+  color: var(--color-cyan);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-magenta);
+}

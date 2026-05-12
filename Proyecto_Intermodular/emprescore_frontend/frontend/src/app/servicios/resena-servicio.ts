@@ -62,11 +62,20 @@ export class ResenaServicio {
     return this.http.put<Resena>(`${this.baseUrl}/${id}/rechazar`, {}, { headers: this.headers() });
   }
 
-   // PUT /api/resenas/{id}/responder - Añade una respuesta a una reseña existente
+  // PUT /api/resenas/{id}/responder - Añade una respuesta a una reseña existente
   responder(id: number, respuesta: string): Observable<Resena> {
     return this.http.put<Resena>(
       `${this.baseUrl}/${id}/responder`,
       { respuesta },
+      { headers: this.headers() }
+    );
+  }
+
+  // PUT /api/resenas/{id} - Edita una reseña
+  editar(id: number, titulo: string, contenido: string, estrella: number): Observable<Resena> {
+    return this.http.put<Resena>(
+      `${this.baseUrl}/${id}`,
+      { titulo, contenido, estrella },
       { headers: this.headers() }
     );
   }

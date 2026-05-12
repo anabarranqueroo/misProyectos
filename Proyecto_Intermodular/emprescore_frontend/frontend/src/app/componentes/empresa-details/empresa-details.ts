@@ -44,8 +44,21 @@ export class EmpresaDetails implements OnInit {
 
   exitoResena: string = '';
 
+  resenaEditando: Resena | null = null;
+  formEditar: FormGroup;
+  estrellasEditar: number = 0;
+  enviandoEdicion: boolean = false;
+  errorEdicion: string = '';
+  exitoEdicion: string = '';
+
   constructor(private route: ActivatedRoute, private empresaServicio: EmpresaServicio, private resenaServicio: ResenaServicio, private reporteServicio: ReporteServicio, public authServicio: AuthServicio, private fb: FormBuilder) {
     this.formResena = this.fb.group({
+      titulo: this.fb.control('', [Validators.required, Validators.minLength(3)]),
+      contenido: this.fb.control('', [Validators.required, Validators.minLength(10)]),
+      estrella: this.fb.control(0, [Validators.required, Validators.min(1)])
+    });
+
+    this.formEditar = this.fb.group({
       titulo: this.fb.control('', [Validators.required, Validators.minLength(3)]),
       contenido: this.fb.control('', [Validators.required, Validators.minLength(10)]),
       estrella: this.fb.control(0, [Validators.required, Validators.min(1)])
@@ -254,6 +267,60 @@ export class EmpresaDetails implements OnInit {
       error: (err) => {
         this.errorReporte = err.error?.message || 'Error al enviar el reporte';
         this.enviandoReporte = false;
+      }
+    });
+  }
+
+  abrirEditarResena(resena: Resena): void {
+    this.resenaEditando = resena;
+    this.estrellasEditar = resena.estrella;
+    this.errorEdicion = '';
+    this.exitoEdicion = '';
+    this.formEditar.patchValue({
+      titulo: resena.titulo,
+      contenido: resena.contenido,
+      estrella: resena.estrella
+    });
+  }
+
+  cerrarEditarResena(): void {
+    this.resenaEditando = null;
+    this.estrellasEditar = 0;
+    this.errorEdicion = '';
+    this.exitoEdicion = '';
+    this.formEditar.reset();
+  }
+
+  seleccionarEstrellaEditar(num: number): void {
+    this.estrellasEditar = num;
+    this.formEditar.patchValue({ estrella: num });
+  }
+
+  enviarEdicion(): void {
+    if (this.formEditar.invalid) {
+      this.formEditar.markAllAsTouched();
+      return;
+    }
+    this.enviandoEdicion = true;
+    this.errorEdicion = '';
+
+    this.resenaServicio.editar(
+      this.resenaEditando!.id!,
+      this.formEditar.value.titulo,
+      this.formEditar.value.contenido,
+      this.formEditar.value.estrella
+    ).subscribe({
+      next: () => {
+        this.enviandoEdicion = false;
+        this.resenaEditando = null;
+        this.exitoEdicion = 'Tu reseña ha sido editada y está pendiente de aprobación por el administrador.';
+        const id = Number(this.route.snapshot.paramMap.get('id'));
+        this.cargarResenas(id);
+        this.cargarMedia(id);
+      },
+      error: (err) => {
+        this.errorEdicion = err.error?.message || 'Error al editar la reseña';
+        this.enviandoEdicion = false;
       }
     });
   }

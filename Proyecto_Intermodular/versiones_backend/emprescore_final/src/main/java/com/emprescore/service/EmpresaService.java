@@ -2,7 +2,11 @@ package com.emprescore.service;
 
 import com.emprescore.model.Empresa;
 import com.emprescore.repo.EmpresaRepository;
+import com.emprescore.repo.ResenaRepository;
+import com.emprescore.repo.ReporteResenaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -10,9 +14,13 @@ import java.util.List;
 public class EmpresaService {
 
     private final EmpresaRepository empresaRepository;
+    private final ResenaRepository resenaRepository;
+    private final ReporteResenaRepository reporteRepository;
 
-    public EmpresaService(EmpresaRepository empresaRepository) {
+    public EmpresaService(EmpresaRepository empresaRepository, ResenaRepository resenaRepository, ReporteResenaRepository reporteRepository) {
         this.empresaRepository = empresaRepository;
+        this.resenaRepository = resenaRepository;
+        this.reporteRepository = reporteRepository;
     }
 
     public List<Empresa> findAll() {
@@ -44,10 +52,20 @@ public class EmpresaService {
         return empresaRepository.save(existente);
     }
 
+    @Transactional
     public void delete(Long id) {
         if (!empresaRepository.existsById(id)) {
             throw new RuntimeException("Empresa no encontrada");
         }
+        // 1. Borrar reportes de las reseñas de la empresa
+        resenaRepository.findByEmpresaId(id).forEach(resena -> {
+            reporteRepository.findByResenaId(resena.getId())
+                .forEach(r -> reporteRepository.deleteById(r.getId()));
+        });
+        // 2. Borrar reseñas de la empresa
+        resenaRepository.findByEmpresaId(id)
+            .forEach(r -> resenaRepository.deleteById(r.getId()));
+        // 3. Borrar la empresa
         empresaRepository.deleteById(id);
     }
 
